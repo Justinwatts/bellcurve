@@ -742,8 +742,12 @@
             const labelGap = 38;
 
             skills.forEach((skill, skillIndex) => {
-                const lowerX = scoreToXLocal(skill.lowerScore);
-                const upperX = scoreToXLocal(skill.upperScore);
+                // Clamp scores to visible range (55-145)
+                const clampedLower = Math.max(MIN_SCORE, Math.min(MAX_SCORE, skill.lowerScore));
+                const clampedUpper = Math.max(MIN_SCORE, Math.min(MAX_SCORE, skill.upperScore));
+
+                const lowerX = scoreToXLocal(clampedLower);
+                const upperX = scoreToXLocal(clampedUpper);
                 const midX = (lowerX + upperX) / 2;
                 const labelColor = COLORS[skill.color];
 
@@ -767,7 +771,7 @@
                 ctx.lineTo(upperX, lineY);
                 ctx.stroke();
 
-                // Draw endpoint circles
+                // Draw endpoint circles (always show dots at the clamped positions)
                 ctx.beginPath();
                 ctx.fillStyle = labelColor;
                 ctx.arc(lowerX, lineY, 5, 0, Math.PI * 2);
