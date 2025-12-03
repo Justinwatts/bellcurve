@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuropsychology Bell Curve Visualizer</title>
+    <title>Neuropsychological Assessment Bell Curve</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -36,7 +36,7 @@
         .header h1 {
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: #2D5C5E;
             margin-bottom: 8px;
         }
@@ -73,7 +73,7 @@
             color: #2D5C5E;
         }
 
-        input[type="text"], select {
+        input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 12px 14px;
             border: 2px solid #E0E0E0;
@@ -85,7 +85,7 @@
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        input[type="text"]:focus, select:focus {
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
             outline: none;
             border-color: #E8B84A;
             box-shadow: 0 0 0 3px rgba(232, 184, 74, 0.15);
@@ -93,7 +93,7 @@
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 16px;
             margin-bottom: 16px;
         }
@@ -126,11 +126,11 @@
         }
 
         .color-btn[data-color="gray"] { background-color: #6B7280; }
-        .color-btn[data-color="orange"] { background-color: #F59E0B; }
-        .color-btn[data-color="green"] { background-color: #10B981; }
-        .color-btn[data-color="blue"] { background-color: #3B82F6; }
-        .color-btn[data-color="teal"] { background-color: #14B8A6; }
-        .color-btn[data-color="purple"] { background-color: #8B5CF6; }
+        .color-btn[data-color="orange"] { background-color: #D97706; }
+        .color-btn[data-color="green"] { background-color: #059669; }
+        .color-btn[data-color="blue"] { background-color: #2563EB; }
+        .color-btn[data-color="teal"] { background-color: #0891B2; }
+        .color-btn[data-color="purple"] { background-color: #7C3AED; }
 
         .btn {
             padding: 12px 24px;
@@ -216,9 +216,18 @@
             flex: 1;
         }
 
+        .skill-score {
+            font-size: 0.9rem;
+            color: #2D5C5E;
+            font-weight: 600;
+        }
+
         .skill-zone {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #666666;
+            padding: 4px 8px;
+            background: #E5E5E5;
+            border-radius: 4px;
         }
 
         .skill-remove {
@@ -249,10 +258,6 @@
         }
 
         .chart-container {
-            display: none;
-        }
-
-        .chart-container.visible {
             display: block;
         }
 
@@ -261,7 +266,7 @@
             text-align: center;
             background: #FFFFFF;
             border-radius: 8px;
-            padding: 10px;
+            padding: 20px 10px;
         }
 
         canvas {
@@ -283,13 +288,19 @@
             display: block;
         }
 
+        .score-info {
+            font-size: 0.8rem;
+            color: #666666;
+            margin-top: 6px;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 20px 12px;
             }
 
             .header h1 {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
             }
 
             .form-row {
@@ -316,6 +327,7 @@
             .skill-zone {
                 width: 100%;
                 margin-top: 4px;
+                text-align: center;
             }
         }
     </style>
@@ -323,8 +335,8 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>Neuropsychology Bell Curve</h1>
-            <p>Visualize cognitive assessment results across standardized zones</p>
+            <h1>Assessment Bell Curve</h1>
+            <p>Visualize cognitive assessment results using WISC-V/WAIS-IV classification</p>
         </header>
 
         <div class="card">
@@ -333,19 +345,12 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="skillName">Skill / Measure Name</label>
-                    <input type="text" id="skillName" placeholder="e.g., Speed of thinking">
+                    <input type="text" id="skillName" placeholder="e.g., Processing Speed">
                 </div>
                 <div class="form-group">
-                    <label for="skillZone">Performance Zone</label>
-                    <select id="skillZone">
-                        <option value="0">Extremely Low</option>
-                        <option value="1">Very Low</option>
-                        <option value="2">Low Average</option>
-                        <option value="3" selected>Average</option>
-                        <option value="4">High Average</option>
-                        <option value="5">Very High</option>
-                        <option value="6">Extremely High</option>
-                    </select>
+                    <label for="standardScore">Standard Score</label>
+                    <input type="number" id="standardScore" min="40" max="160" step="1" value="100" placeholder="40-160">
+                    <div class="score-info">Range: 40-160 (Mean: 100, SD: 15)</div>
                 </div>
             </div>
 
@@ -382,7 +387,7 @@
             <div class="card">
                 <div class="card-title">Assessment Results Distribution</div>
                 <div class="canvas-wrapper">
-                    <canvas id="bellCurveCanvas" width="900" height="520"></canvas>
+                    <canvas id="bellCurveCanvas" width="1000" height="600"></canvas>
                 </div>
                 <div class="button-row">
                     <button class="btn btn-primary" onclick="downloadChart()">Download as PNG</button>
@@ -392,23 +397,24 @@
     </div>
 
     <script>
+        // WISC-V/WAIS-IV Classification System
         const ZONES = [
-            { name: 'Extremely Low', color: '#F4B4B4' },
-            { name: 'Very Low', color: '#F9E4A6' },
-            { name: 'Low Average', color: '#D4E8B4' },
-            { name: 'Average', color: '#A8D8D0' },
-            { name: 'High Average', color: '#D4E8B4' },
-            { name: 'Very High', color: '#F9E4A6' },
-            { name: 'Extremely High', color: '#F4B4B4' }
+            { name: 'Extremely Low', minScore: 0, maxScore: 69, color: '#F4A4A4', percentile: '<2' },
+            { name: 'Very Low', minScore: 70, maxScore: 79, color: '#FCE588', percentile: '2-8' },
+            { name: 'Low Average', minScore: 80, maxScore: 89, color: '#C6E8A8', percentile: '9-24' },
+            { name: 'Average', minScore: 90, maxScore: 109, color: '#7DD3C0', percentile: '25-74' },
+            { name: 'High Average', minScore: 110, maxScore: 119, color: '#C6E8A8', percentile: '75-90' },
+            { name: 'Very High', minScore: 120, maxScore: 129, color: '#FCE588', percentile: '91-97' },
+            { name: 'Extremely High', minScore: 130, maxScore: 200, color: '#F4A4A4', percentile: '98-99.9' }
         ];
 
         const COLORS = {
             gray: '#6B7280',
-            orange: '#F59E0B',
-            green: '#10B981',
-            blue: '#3B82F6',
-            teal: '#14B8A6',
-            purple: '#8B5CF6'
+            orange: '#D97706',
+            green: '#059669',
+            blue: '#2563EB',
+            teal: '#0891B2',
+            purple: '#7C3AED'
         };
 
         let skills = [];
@@ -423,24 +429,48 @@
             });
         });
 
-        // Add default example data
+        function getZoneForScore(score) {
+            for (let i = 0; i < ZONES.length; i++) {
+                if (score >= ZONES[i].minScore && score <= ZONES[i].maxScore) {
+                    return i;
+                }
+            }
+            return 3; // Default to Average
+        }
+
+        function getZoneName(score) {
+            const zoneIndex = getZoneForScore(score);
+            return ZONES[zoneIndex].name;
+        }
+
+        // Load default example data
         function loadExampleData() {
             skills = [
-                { name: 'Verbal Skills', zone: 4, color: 'orange' },
-                { name: 'Visual Memory', zone: 3, color: 'blue' },
-                { name: 'Attention', zone: 2, color: 'gray' }
+                { name: 'Verbal Skills', score: 112, color: 'orange' },
+                { name: 'Processing Speed', score: 95, color: 'blue' },
+                { name: 'Attention', score: 82, color: 'gray' },
+                { name: 'Visual Memory', score: 105, color: 'green' }
             ];
             renderSkillsList();
+            generateChart();
         }
 
         function addSkill() {
             const nameInput = document.getElementById('skillName');
-            const zoneSelect = document.getElementById('skillZone');
+            const scoreInput = document.getElementById('standardScore');
             const errorDiv = document.getElementById('errorMessage');
 
             const name = nameInput.value.trim();
+            const score = parseInt(scoreInput.value);
+
             if (!name) {
                 errorDiv.textContent = 'Please enter a skill name.';
+                errorDiv.classList.add('visible');
+                return;
+            }
+
+            if (isNaN(score) || score < 40 || score > 160) {
+                errorDiv.textContent = 'Please enter a valid standard score between 40 and 160.';
                 errorDiv.classList.add('visible');
                 return;
             }
@@ -449,17 +479,22 @@
 
             skills.push({
                 name: name,
-                zone: parseInt(zoneSelect.value),
+                score: score,
                 color: selectedColor
             });
 
             nameInput.value = '';
+            scoreInput.value = '100';
             renderSkillsList();
+            generateChart();
         }
 
         function removeSkill(index) {
             skills.splice(index, 1);
             renderSkillsList();
+            if (skills.length > 0) {
+                generateChart();
+            }
         }
 
         function renderSkillsList() {
@@ -474,7 +509,8 @@
                 <div class="skill-item">
                     <div class="skill-color" style="background-color: ${COLORS[skill.color]}"></div>
                     <div class="skill-name">${escapeHtml(skill.name)}</div>
-                    <div class="skill-zone">${ZONES[skill.zone].name}</div>
+                    <div class="skill-score">SS: ${skill.score}</div>
+                    <div class="skill-zone">${getZoneName(skill.score)}</div>
                     <button class="skill-remove" onclick="removeSkill(${index})" title="Remove">×</button>
                 </div>
             `).join('');
@@ -487,195 +523,256 @@
         }
 
         function generateChart() {
-            const errorDiv = document.getElementById('errorMessage');
-
             if (skills.length === 0) {
-                errorDiv.textContent = 'Please add at least one skill to visualize.';
-                errorDiv.classList.add('visible');
-                document.getElementById('chartContainer').classList.remove('visible');
                 return;
             }
-
-            errorDiv.classList.remove('visible');
             drawBellCurve();
-            document.getElementById('chartContainer').classList.add('visible');
-            document.getElementById('chartContainer').scrollIntoView({ behavior: 'smooth' });
         }
 
         function drawBellCurve() {
             const canvas = document.getElementById('bellCurveCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Clear canvas
+            // Clear canvas with white background
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Chart dimensions
-            const padding = { top: 120, right: 40, bottom: 100, left: 40 };
+            // Layout dimensions
+            const padding = { top: 30, right: 30, bottom: 30, left: 30 };
             const chartWidth = canvas.width - padding.left - padding.right;
-            const chartHeight = canvas.height - padding.top - padding.bottom;
 
-            // Zone width
-            const zoneWidth = chartWidth / 7;
+            // Split: top 55% for curve, bottom 45% for colored bands
+            const curveAreaHeight = 300;
+            const bandsAreaHeight = 240;
+            const curveBottom = padding.top + curveAreaHeight;
 
-            // Draw zone backgrounds
+            // Zone widths (Average is wider to represent more of the population)
+            const zoneWidths = [1, 1, 1, 1.4, 1, 1, 1];
+            const totalWidth = zoneWidths.reduce((a, b) => a + b, 0);
+            const zonePixelWidths = zoneWidths.map(w => (w / totalWidth) * chartWidth);
+
+            // Calculate zone x positions
+            let zoneXPositions = [];
+            let currentX = padding.left;
+            for (let i = 0; i < ZONES.length; i++) {
+                zoneXPositions.push({
+                    start: currentX,
+                    end: currentX + zonePixelWidths[i],
+                    center: currentX + zonePixelWidths[i] / 2,
+                    width: zonePixelWidths[i]
+                });
+                currentX += zonePixelWidths[i];
+            }
+
+            // 1. Draw colored bands BELOW the curve area
             ZONES.forEach((zone, i) => {
                 ctx.fillStyle = zone.color;
                 ctx.fillRect(
-                    padding.left + i * zoneWidth,
-                    padding.top,
-                    zoneWidth,
-                    chartHeight
+                    zoneXPositions[i].start,
+                    curveBottom,
+                    zonePixelWidths[i],
+                    bandsAreaHeight
                 );
             });
 
-            // Draw bell curve
-            ctx.beginPath();
-            ctx.strokeStyle = '#2D5C5E';
-            ctx.lineWidth = 3;
-
-            const curvePoints = [];
-            for (let i = 0; i <= 100; i++) {
-                const x = padding.left + (i / 100) * chartWidth;
-                const normalizedX = (i - 50) / 15; // Normalize for bell curve
-                const y = Math.exp(-0.5 * normalizedX * normalizedX);
-                const canvasY = padding.top + chartHeight - (y * chartHeight * 0.9);
-                curvePoints.push({ x, y: canvasY });
-
-                if (i === 0) {
-                    ctx.moveTo(x, canvasY);
-                } else {
-                    ctx.lineTo(x, canvasY);
-                }
-            }
-            ctx.stroke();
-
-            // Fill under the curve with gradient
-            ctx.beginPath();
-            ctx.moveTo(padding.left, padding.top + chartHeight);
-            curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
-            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(45, 92, 94, 0.1)';
-            ctx.fill();
-
-            // Draw center line
-            const centerX = padding.left + chartWidth / 2;
-            ctx.beginPath();
-            ctx.strokeStyle = '#2D5C5E';
+            // Draw thin white lines between bands
+            ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 2;
-            ctx.setLineDash([6, 4]);
-            ctx.moveTo(centerX, padding.top);
-            ctx.lineTo(centerX, padding.top + chartHeight);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Draw zone divider lines
-            ctx.strokeStyle = '#CCCCCC';
-            ctx.lineWidth = 1;
-            for (let i = 1; i < 7; i++) {
-                const x = padding.left + i * zoneWidth;
+            for (let i = 1; i < ZONES.length; i++) {
                 ctx.beginPath();
-                ctx.moveTo(x, padding.top);
-                ctx.lineTo(x, padding.top + chartHeight);
+                ctx.moveTo(zoneXPositions[i].start, curveBottom);
+                ctx.lineTo(zoneXPositions[i].start, curveBottom + bandsAreaHeight);
                 ctx.stroke();
             }
 
-            // Draw zone labels
-            ctx.textAlign = 'center';
-            ctx.font = '600 11px "Open Sans", sans-serif';
-            ctx.fillStyle = '#333333';
+            // 2. Generate bell curve points
+            const curvePoints = [];
+            const numPoints = 300;
 
-            ZONES.forEach((zone, i) => {
-                const x = padding.left + (i + 0.5) * zoneWidth;
-                const y = padding.top + chartHeight + 20;
+            for (let i = 0; i <= numPoints; i++) {
+                const t = i / numPoints;
+                const x = padding.left + t * chartWidth;
 
-                // Split long names
-                const words = zone.name.split(' ');
-                if (words.length > 1) {
-                    ctx.fillText(words[0], x, y);
-                    ctx.fillText(words[1], x, y + 14);
+                // Map x position to standard score (40-160 range)
+                const score = 40 + t * 120;
+
+                // Calculate y using normal distribution (mean=100, sd=15)
+                const z = (score - 100) / 15;
+                const y = Math.exp(-0.5 * z * z);
+
+                // Scale y to fit in curve area (leave some padding at top)
+                const canvasY = curveBottom - (y * (curveAreaHeight - 40));
+                curvePoints.push({ x, y: canvasY, normalY: y });
+            }
+
+            // 3. Fill under the bell curve with semi-transparent blue
+            ctx.beginPath();
+            ctx.moveTo(padding.left, curveBottom);
+            curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
+            ctx.lineTo(padding.left + chartWidth, curveBottom);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(100, 150, 190, 0.6)';
+            ctx.fill();
+
+            // 4. Draw curve outline
+            ctx.beginPath();
+            ctx.strokeStyle = '#2D5C5E';
+            ctx.lineWidth = 3;
+            curvePoints.forEach((point, i) => {
+                if (i === 0) {
+                    ctx.moveTo(point.x, point.y);
                 } else {
-                    ctx.fillText(zone.name, x, y + 7);
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+            ctx.stroke();
+
+            // 5. Draw center mean line (dashed) - from top to bottom of entire canvas
+            const centerX = zoneXPositions[3].center;
+            ctx.beginPath();
+            ctx.strokeStyle = '#1F2937';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 6]);
+            ctx.moveTo(centerX, padding.top);
+            ctx.lineTo(centerX, curveBottom + bandsAreaHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 6. Draw people icons INSIDE the bell curve
+            const personCounts = [1, 3, 6, 12, 6, 3, 1];
+            const iconSize = 16;
+
+            ZONES.forEach((zone, zoneIndex) => {
+                const count = personCounts[zoneIndex];
+                const zoneCenterX = zoneXPositions[zoneIndex].center;
+                const zoneWidth = zoneXPositions[zoneIndex].width;
+
+                // Calculate grid layout
+                let cols, rows;
+                if (count === 1) {
+                    cols = 1; rows = 1;
+                } else if (count === 3) {
+                    cols = 3; rows = 1;
+                } else if (count === 6) {
+                    cols = 3; rows = 2;
+                } else if (count === 12) {
+                    cols = 4; rows = 3;
+                }
+
+                const spacingX = 22;
+                const spacingY = 32;
+
+                // Get the curve height at this zone's center for positioning
+                const zoneT = (zoneCenterX - padding.left) / chartWidth;
+                const zoneScore = 40 + zoneT * 120;
+                const zoneZ = (zoneScore - 100) / 15;
+                const zoneCurveHeight = Math.exp(-0.5 * zoneZ * zoneZ) * (curveAreaHeight - 40);
+
+                // Position icons in bottom portion of the curve at this zone
+                const baseY = curveBottom - 30;
+
+                let iconIndex = 0;
+                for (let row = 0; row < rows && iconIndex < count; row++) {
+                    const iconsInRow = Math.min(cols, count - iconIndex);
+                    const rowStartX = zoneCenterX - ((iconsInRow - 1) * spacingX) / 2;
+
+                    for (let col = 0; col < iconsInRow && iconIndex < count; col++) {
+                        const iconX = rowStartX + col * spacingX;
+                        const iconY = baseY - row * spacingY;
+
+                        // Only draw if within the curve boundary (with some margin)
+                        const iconT = (iconX - padding.left) / chartWidth;
+                        const iconScore = 40 + iconT * 120;
+                        const iconZ = (iconScore - 100) / 15;
+                        const curveHeightAtIcon = Math.exp(-0.5 * iconZ * iconZ) * (curveAreaHeight - 40);
+                        const curveYAtIcon = curveBottom - curveHeightAtIcon;
+
+                        if (iconY > curveYAtIcon + 10) {
+                            drawStickFigure(ctx, iconX, iconY, iconSize);
+                        }
+
+                        iconIndex++;
+                    }
                 }
             });
 
-            // Draw person icons (simple stick figures representation)
-            const personCounts = [1, 2, 4, 6, 4, 2, 1]; // Distribution
-            ctx.fillStyle = '#888888';
-            ctx.font = '20px sans-serif';
+            // 7. Draw zone labels in the colored bands
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            const zoneLabelY = curveBottom + 20;
 
             ZONES.forEach((zone, i) => {
-                const x = padding.left + (i + 0.5) * zoneWidth;
-                const baseY = padding.top + chartHeight - 30;
-                const count = personCounts[i];
+                const centerX = zoneXPositions[i].center;
+                const words = zone.name.split(' ');
 
-                // Draw simple person icons
-                for (let j = 0; j < count; j++) {
-                    const offsetX = (j - (count - 1) / 2) * 14;
-                    drawPersonIcon(ctx, x + offsetX, baseY - j * 0, 10);
+                ctx.font = '600 14px "Montserrat", sans-serif';
+                ctx.fillStyle = '#333333';
+
+                if (words.length > 1) {
+                    ctx.fillText(words[0], centerX, zoneLabelY);
+                    ctx.fillText(words[1], centerX, zoneLabelY + 18);
+                } else {
+                    ctx.fillText(zone.name, centerX, zoneLabelY + 9);
                 }
             });
 
-            // Group skills by zone for stacking
+            // 8. Draw skill labels BELOW zone labels in the colored bands
+            const skillLabelStartY = curveBottom + 75;
+
+            // Group skills by zone
             const skillsByZone = {};
             skills.forEach(skill => {
-                if (!skillsByZone[skill.zone]) {
-                    skillsByZone[skill.zone] = [];
+                const zoneIndex = getZoneForScore(skill.score);
+                if (!skillsByZone[zoneIndex]) {
+                    skillsByZone[zoneIndex] = [];
                 }
-                skillsByZone[skill.zone].push(skill);
+                skillsByZone[zoneIndex].push(skill);
             });
 
             // Draw skill labels
-            const labelHeight = 28;
-            const labelPadding = 6;
+            const labelHeight = 26;
             const labelGap = 8;
 
             Object.entries(skillsByZone).forEach(([zoneIndex, zoneSkills]) => {
                 const zone = parseInt(zoneIndex);
-                const zoneCenterX = padding.left + (zone + 0.5) * zoneWidth;
+                const zoneCenterX = zoneXPositions[zone].center;
 
                 zoneSkills.forEach((skill, stackIndex) => {
-                    const labelY = padding.top - 20 - (stackIndex * (labelHeight + labelGap));
+                    const labelY = skillLabelStartY + (stackIndex * (labelHeight + labelGap));
                     const labelColor = COLORS[skill.color];
 
                     // Measure text width
                     ctx.font = '600 12px "Open Sans", sans-serif';
                     const textWidth = ctx.measureText(skill.name).width;
-                    const labelWidth = textWidth + labelPadding * 2 + 16;
+                    const labelWidth = Math.min(textWidth + 24, zoneXPositions[zone].width - 10);
 
-                    // Draw label background with rounded corners
+                    // Draw connector dot
+                    ctx.beginPath();
+                    ctx.fillStyle = labelColor;
+                    ctx.arc(zoneCenterX, skillLabelStartY - 12, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Draw label pill background
                     const labelX = zoneCenterX - labelWidth / 2;
-                    drawRoundedRect(ctx, labelX, labelY - labelHeight / 2, labelWidth, labelHeight, 6, labelColor);
+                    drawRoundedRect(ctx, labelX, labelY, labelWidth, labelHeight, 13, labelColor);
 
                     // Draw text
                     ctx.fillStyle = '#FFFFFF';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(skill.name, zoneCenterX, labelY);
-
-                    // Draw pointer line
-                    ctx.beginPath();
-                    ctx.strokeStyle = labelColor;
-                    ctx.lineWidth = 2;
-                    ctx.moveTo(zoneCenterX, labelY + labelHeight / 2);
-                    ctx.lineTo(zoneCenterX, padding.top + 10);
-                    ctx.stroke();
-
-                    // Draw small circle at end
-                    ctx.beginPath();
-                    ctx.fillStyle = labelColor;
-                    ctx.arc(zoneCenterX, padding.top + 10, 4, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.font = '600 12px "Open Sans", sans-serif';
+                    ctx.fillText(skill.name, zoneCenterX, labelY + labelHeight / 2);
                 });
             });
 
-            // Draw title
-            ctx.font = '700 18px "Montserrat", sans-serif';
-            ctx.fillStyle = '#2D5C5E';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            // Title is handled by the card, so we skip it here
+            // 9. Draw bottom border line at bottom of curve area
+            ctx.beginPath();
+            ctx.strokeStyle = '#2D5C5E';
+            ctx.lineWidth = 2;
+            ctx.moveTo(padding.left, curveBottom);
+            ctx.lineTo(padding.left + chartWidth, curveBottom);
+            ctx.stroke();
         }
 
         function drawRoundedRect(ctx, x, y, width, height, radius, color) {
@@ -694,27 +791,53 @@
             ctx.fill();
         }
 
-        function drawPersonIcon(ctx, x, y, size) {
-            ctx.fillStyle = 'rgba(45, 92, 94, 0.4)';
+        function drawStickFigure(ctx, x, y, size) {
+            ctx.strokeStyle = '#4B5563';
+            ctx.fillStyle = '#4B5563';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
 
-            // Head
+            // Head (circle)
+            const headRadius = size * 0.25;
             ctx.beginPath();
-            ctx.arc(x, y - size * 0.7, size * 0.3, 0, Math.PI * 2);
+            ctx.arc(x, y - size * 0.5, headRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Body (triangle-ish)
+            // Body (vertical line)
             ctx.beginPath();
-            ctx.moveTo(x, y - size * 0.35);
-            ctx.lineTo(x - size * 0.35, y + size * 0.3);
-            ctx.lineTo(x + size * 0.35, y + size * 0.3);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(x, y - size * 0.25);
+            ctx.lineTo(x, y + size * 0.15);
+            ctx.stroke();
+
+            // Left leg
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.15);
+            ctx.lineTo(x - size * 0.2, y + size * 0.5);
+            ctx.stroke();
+
+            // Right leg
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.15);
+            ctx.lineTo(x + size * 0.2, y + size * 0.5);
+            ctx.stroke();
+
+            // Left arm
+            ctx.beginPath();
+            ctx.moveTo(x, y - size * 0.1);
+            ctx.lineTo(x - size * 0.25, y + size * 0.05);
+            ctx.stroke();
+
+            // Right arm
+            ctx.beginPath();
+            ctx.moveTo(x, y - size * 0.1);
+            ctx.lineTo(x + size * 0.25, y + size * 0.05);
+            ctx.stroke();
         }
 
         function downloadChart() {
             const canvas = document.getElementById('bellCurveCanvas');
             const link = document.createElement('a');
-            link.download = 'neuropsych-bell-curve.png';
+            link.download = 'assessment-bell-curve.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
@@ -722,12 +845,22 @@
         function clearAll() {
             skills = [];
             renderSkillsList();
-            document.getElementById('chartContainer').classList.remove('visible');
-            document.getElementById('errorMessage').classList.remove('visible');
+            // Clear the canvas
+            const canvas = document.getElementById('bellCurveCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         // Enter key to add skill
         document.getElementById('skillName').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill();
+            }
+        });
+
+        document.getElementById('standardScore').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 addSkill();
