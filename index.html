@@ -476,14 +476,9 @@
         }
 
         function loadExampleData() {
-            skills = [
-                { name: 'Verbal Skills', lowerScore: 108, upperScore: 118, color: 'orange' },
-                { name: 'Processing Speed', lowerScore: 88, upperScore: 102, color: 'blue' },
-                { name: 'Attention', lowerScore: 76, upperScore: 88, color: 'gray' },
-                { name: 'Visual Memory', lowerScore: 98, upperScore: 112, color: 'green' }
-            ];
+            // Start with empty list
+            skills = [];
             renderSkillsList();
-            generateChart();
         }
 
         function addSkill() {
