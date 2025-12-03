@@ -402,21 +402,21 @@
 
     <script>
         // WISC-V/WAIS-IV Classification System with exact score boundaries
-        // Using score range 55-145 for display (90 points total, centered on 100)
+        // Using score range 60-140 for display (80 points total, centered on 100)
         const ZONES = [
-            { name: 'Extremely Low', startScore: 55, endScore: 70, color: '#F4A4A4', percentile: '<2' },
+            { name: 'Extremely Low', startScore: 60, endScore: 70, color: '#F4A4A4', percentile: '<2' },
             { name: 'Very Low', startScore: 70, endScore: 80, color: '#FCE588', percentile: '2-8' },
             { name: 'Low Average', startScore: 80, endScore: 90, color: '#C6E8A8', percentile: '9-24' },
             { name: 'Average', startScore: 90, endScore: 110, color: '#7DD3C0', percentile: '25-74' },
             { name: 'High Average', startScore: 110, endScore: 120, color: '#C6E8A8', percentile: '75-90' },
             { name: 'Very High', startScore: 120, endScore: 130, color: '#FCE588', percentile: '91-97' },
-            { name: 'Extremely High', startScore: 130, endScore: 145, color: '#F4A4A4', percentile: '98-99.9' }
+            { name: 'Extremely High', startScore: 130, endScore: 140, color: '#F4A4A4', percentile: '98-99.9' }
         ];
 
         // Score range for the chart
-        const MIN_SCORE = 55;
-        const MAX_SCORE = 145;
-        const SCORE_RANGE = MAX_SCORE - MIN_SCORE; // 90 points
+        const MIN_SCORE = 60;
+        const MAX_SCORE = 140;
+        const SCORE_RANGE = MAX_SCORE - MIN_SCORE; // 80 points
 
         const COLORS = {
             gray: '#6B7280',
@@ -646,7 +646,7 @@
             for (let i = 0; i <= numPoints; i++) {
                 const t = i / numPoints;
                 const x = chartStartX + t * chartWidth;  // Use same boundaries as bands
-                const score = 55 + t * 90;
+                const score = MIN_SCORE + t * SCORE_RANGE;
                 const height = bellCurveY(score, curveAreaHeight);
                 const canvasY = curveBottom - height;
                 curvePoints.push({ x, y: canvasY, score, height });
