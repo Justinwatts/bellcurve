@@ -340,11 +340,20 @@
         </header>
 
         <div class="card">
-            <div class="card-title">Add Assessment Measures</div>
+            <div class="card-title">How to generate a visualisation of assessment results:</div>
+            <ol style="margin: 0 0 20px 20px; color: #666666; font-size: 0.9rem; line-height: 1.8;">
+                <li>Type the domain/ability name</li>
+                <li>Type the lower and upper 95% confidence interval in standard scores</li>
+                <li>Choose a colour for the label.</li>
+                <li>Click Add Skill.</li>
+                <li>Repeat Steps 1-4 to add more domains</li>
+                <li>To edit, remove a skill from 'Added Domains/Abilities' and repeat steps 1-4.</li>
+                <li>Download as PNG.</li>
+            </ol>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="skillName">Skill / Measure Name</label>
+                    <label for="skillName">Domain / Ability Name</label>
                     <input type="text" id="skillName" placeholder="e.g., Processing Speed">
                 </div>
                 <div class="form-group">
@@ -373,9 +382,9 @@
             <button class="btn btn-add" onclick="addSkill()">Add Skill</button>
 
             <div class="skills-list">
-                <div class="skills-list-title">Added Measures</div>
+                <div class="skills-list-title">Added Domains/Abilities</div>
                 <div id="skillsList">
-                    <div class="empty-state">No measures added yet</div>
+                    <div class="empty-state">No domains/abilities added yet</div>
                 </div>
             </div>
 
@@ -398,6 +407,10 @@
                 </div>
             </div>
         </div>
+
+        <footer style="text-align: center; margin-top: 40px; padding: 20px; color: #666666; font-size: 0.85rem;">
+            With thanks to Justin Watts for his coding wizardry. For any feedback or queries, email <a href="mailto:amy@launchpsychology.com.au" style="color: #2D5C5E;">amy@launchpsychology.com.au</a>
+        </footer>
     </div>
 
     <script>
@@ -535,7 +548,7 @@
             const container = document.getElementById('skillsList');
 
             if (skills.length === 0) {
-                container.innerHTML = '<div class="empty-state">No measures added yet</div>';
+                container.innerHTML = '<div class="empty-state">No domains/abilities added yet</div>';
                 return;
             }
 
