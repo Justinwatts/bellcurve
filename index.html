@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuropsychology Bell Curve Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #F9F7F4;
+            color: #333333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: #2D5C5E;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666666;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #2D5C5E;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 8px;
+            color: #2D5C5E;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.95rem;
+            color: #333333;
+            background: #FFFFFF;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #E8B84A;
+            box-shadow: 0 0 0 3px rgba(232, 184, 74, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.selected {
+            border-color: #2D5C5E;
+        }
+
+        .color-btn[data-color="gray"] { background-color: #6B7280; }
+        .color-btn[data-color="orange"] { background-color: #F59E0B; }
+        .color-btn[data-color="green"] { background-color: #10B981; }
+        .color-btn[data-color="blue"] { background-color: #3B82F6; }
+        .color-btn[data-color="teal"] { background-color: #14B8A6; }
+        .color-btn[data-color="purple"] { background-color: #8B5CF6; }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #E8B84A;
+            color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(232, 184, 74, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #d4a63f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #F0F0F0;
+            color: #333333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #E5E5E5;
+        }
+
+        .btn-add {
+            background-color: #2D5C5E;
+            color: #FFFFFF;
+        }
+
+        .btn-add:hover {
+            background-color: #234849;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .skills-list {
+            margin-top: 20px;
+        }
+
+        .skills-list-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #666666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .skill-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #F9F7F4;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .skill-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            color: #333333;
+            flex: 1;
+        }
+
+        .skill-zone {
+            font-size: 0.85rem;
+            color: #666666;
+        }
+
+        .skill-remove {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #E0E0E0;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #666666;
+            transition: all 0.2s;
+        }
+
+        .skill-remove:hover {
+            background: #FF6B6B;
+            color: #FFFFFF;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #999999;
+            font-style: italic;
+        }
+
+        .chart-container {
+            display: none;
+        }
+
+        .chart-container.visible {
+            display: block;
+        }
+
+        .canvas-wrapper {
+            overflow-x: auto;
+            text-align: center;
+            background: #FFFFFF;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .error-message {
+            background: #FFF0F0;
+            border: 1px solid #F4B4B4;
+            color: #993333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            .skill-item {
+                flex-wrap: wrap;
+            }
+
+            .skill-zone {
+                width: 100%;
+                margin-top: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Neuropsychology Bell Curve</h1>
+            <p>Visualize cognitive assessment results across standardized zones</p>
+        </header>
+
+        <div class="card">
+            <div class="card-title">Add Assessment Measures</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="skillName">Skill / Measure Name</label>
+                    <input type="text" id="skillName" placeholder="e.g., Speed of thinking">
+                </div>
+                <div class="form-group">
+                    <label for="skillZone">Performance Zone</label>
+                    <select id="skillZone">
+                        <option value="0">Extremely Low</option>
+                        <option value="1">Very Low</option>
+                        <option value="2">Low Average</option>
+                        <option value="3" selected>Average</option>
+                        <option value="4">High Average</option>
+                        <option value="5">Very High</option>
+                        <option value="6">Extremely High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Label Color</label>
+                <div class="color-options">
+                    <button type="button" class="color-btn selected" data-color="gray" title="Gray"></button>
+                    <button type="button" class="color-btn" data-color="orange" title="Orange"></button>
+                    <button type="button" class="color-btn" data-color="green" title="Green"></button>
+                    <button type="button" class="color-btn" data-color="blue" title="Blue"></button>
+                    <button type="button" class="color-btn" data-color="teal" title="Teal"></button>
+                    <button type="button" class="color-btn" data-color="purple" title="Purple"></button>
+                </div>
+            </div>
+
+            <button class="btn btn-add" onclick="addSkill()">Add Skill</button>
+
+            <div class="skills-list">
+                <div class="skills-list-title">Added Measures</div>
+                <div id="skillsList">
+                    <div class="empty-state">No measures added yet</div>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn btn-primary" onclick="generateChart()">Generate Chart</button>
+                <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <div id="chartContainer" class="chart-container">
+            <div class="card">
+                <div class="card-title">Assessment Results Distribution</div>
+                <div class="canvas-wrapper">
+                    <canvas id="bellCurveCanvas" width="900" height="520"></canvas>
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="downloadChart()">Download as PNG</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ZONES = [
+            { name: 'Extremely Low', color: '#F4B4B4' },
+            { name: 'Very Low', color: '#F9E4A6' },
+            { name: 'Low Average', color: '#D4E8B4' },
+            { name: 'Average', color: '#A8D8D0' },
+            { name: 'High Average', color: '#D4E8B4' },
+            { name: 'Very High', color: '#F9E4A6' },
+            { name: 'Extremely High', color: '#F4B4B4' }
+        ];
+
+        const COLORS = {
+            gray: '#6B7280',
+            orange: '#F59E0B',
+            green: '#10B981',
+            blue: '#3B82F6',
+            teal: '#14B8A6',
+            purple: '#8B5CF6'
+        };
+
+        let skills = [];
+        let selectedColor = 'gray';
+
+        // Initialize color picker
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedColor = btn.dataset.color;
+            });
+        });
+
+        // Add default example data
+        function loadExampleData() {
+            skills = [
+                { name: 'Verbal Skills', zone: 4, color: 'orange' },
+                { name: 'Visual Memory', zone: 3, color: 'blue' },
+                { name: 'Attention', zone: 2, color: 'gray' }
+            ];
+            renderSkillsList();
+        }
+
+        function addSkill() {
+            const nameInput = document.getElementById('skillName');
+            const zoneSelect = document.getElementById('skillZone');
+            const errorDiv = document.getElementById('errorMessage');
+
+            const name = nameInput.value.trim();
+            if (!name) {
+                errorDiv.textContent = 'Please enter a skill name.';
+                errorDiv.classList.add('visible');
+                return;
+            }
+
+            errorDiv.classList.remove('visible');
+
+            skills.push({
+                name: name,
+                zone: parseInt(zoneSelect.value),
+                color: selectedColor
+            });
+
+            nameInput.value = '';
+            renderSkillsList();
+        }
+
+        function removeSkill(index) {
+            skills.splice(index, 1);
+            renderSkillsList();
+        }
+
+        function renderSkillsList() {
+            const container = document.getElementById('skillsList');
+
+            if (skills.length === 0) {
+                container.innerHTML = '<div class="empty-state">No measures added yet</div>';
+                return;
+            }
+
+            container.innerHTML = skills.map((skill, index) => `
+                <div class="skill-item">
+                    <div class="skill-color" style="background-color: ${COLORS[skill.color]}"></div>
+                    <div class="skill-name">${escapeHtml(skill.name)}</div>
+                    <div class="skill-zone">${ZONES[skill.zone].name}</div>
+                    <button class="skill-remove" onclick="removeSkill(${index})" title="Remove">×</button>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function generateChart() {
+            const errorDiv = document.getElementById('errorMessage');
+
+            if (skills.length === 0) {
+                errorDiv.textContent = 'Please add at least one skill to visualize.';
+                errorDiv.classList.add('visible');
+                document.getElementById('chartContainer').classList.remove('visible');
+                return;
+            }
+
+            errorDiv.classList.remove('visible');
+            drawBellCurve();
+            document.getElementById('chartContainer').classList.add('visible');
+            document.getElementById('chartContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function drawBellCurve() {
+            const canvas = document.getElementById('bellCurveCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Clear canvas
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Chart dimensions
+            const padding = { top: 120, right: 40, bottom: 100, left: 40 };
+            const chartWidth = canvas.width - padding.left - padding.right;
+            const chartHeight = canvas.height - padding.top - padding.bottom;
+
+            // Zone width
+            const zoneWidth = chartWidth / 7;
+
+            // Draw zone backgrounds
+            ZONES.forEach((zone, i) => {
+                ctx.fillStyle = zone.color;
+                ctx.fillRect(
+                    padding.left + i * zoneWidth,
+                    padding.top,
+                    zoneWidth,
+                    chartHeight
+                );
+            });
+
+            // Draw bell curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#2D5C5E';
+            ctx.lineWidth = 3;
+
+            const curvePoints = [];
+            for (let i = 0; i <= 100; i++) {
+                const x = padding.left + (i / 100) * chartWidth;
+                const normalizedX = (i - 50) / 15; // Normalize for bell curve
+                const y = Math.exp(-0.5 * normalizedX * normalizedX);
+                const canvasY = padding.top + chartHeight - (y * chartHeight * 0.9);
+                curvePoints.push({ x, y: canvasY });
+
+                if (i === 0) {
+                    ctx.moveTo(x, canvasY);
+                } else {
+                    ctx.lineTo(x, canvasY);
+                }
+            }
+            ctx.stroke();
+
+            // Fill under the curve with gradient
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top + chartHeight);
+            curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(45, 92, 94, 0.1)';
+            ctx.fill();
+
+            // Draw center line
+            const centerX = padding.left + chartWidth / 2;
+            ctx.beginPath();
+            ctx.strokeStyle = '#2D5C5E';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 4]);
+            ctx.moveTo(centerX, padding.top);
+            ctx.lineTo(centerX, padding.top + chartHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw zone divider lines
+            ctx.strokeStyle = '#CCCCCC';
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 7; i++) {
+                const x = padding.left + i * zoneWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, padding.top + chartHeight);
+                ctx.stroke();
+            }
+
+            // Draw zone labels
+            ctx.textAlign = 'center';
+            ctx.font = '600 11px "Open Sans", sans-serif';
+            ctx.fillStyle = '#333333';
+
+            ZONES.forEach((zone, i) => {
+                const x = padding.left + (i + 0.5) * zoneWidth;
+                const y = padding.top + chartHeight + 20;
+
+                // Split long names
+                const words = zone.name.split(' ');
+                if (words.length > 1) {
+                    ctx.fillText(words[0], x, y);
+                    ctx.fillText(words[1], x, y + 14);
+                } else {
+                    ctx.fillText(zone.name, x, y + 7);
+                }
+            });
+
+            // Draw person icons (simple stick figures representation)
+            const personCounts = [1, 2, 4, 6, 4, 2, 1]; // Distribution
+            ctx.fillStyle = '#888888';
+            ctx.font = '20px sans-serif';
+
+            ZONES.forEach((zone, i) => {
+                const x = padding.left + (i + 0.5) * zoneWidth;
+                const baseY = padding.top + chartHeight - 30;
+                const count = personCounts[i];
+
+                // Draw simple person icons
+                for (let j = 0; j < count; j++) {
+                    const offsetX = (j - (count - 1) / 2) * 14;
+                    drawPersonIcon(ctx, x + offsetX, baseY - j * 0, 10);
+                }
+            });
+
+            // Group skills by zone for stacking
+            const skillsByZone = {};
+            skills.forEach(skill => {
+                if (!skillsByZone[skill.zone]) {
+                    skillsByZone[skill.zone] = [];
+                }
+                skillsByZone[skill.zone].push(skill);
+            });
+
+            // Draw skill labels
+            const labelHeight = 28;
+            const labelPadding = 6;
+            const labelGap = 8;
+
+            Object.entries(skillsByZone).forEach(([zoneIndex, zoneSkills]) => {
+                const zone = parseInt(zoneIndex);
+                const zoneCenterX = padding.left + (zone + 0.5) * zoneWidth;
+
+                zoneSkills.forEach((skill, stackIndex) => {
+                    const labelY = padding.top - 20 - (stackIndex * (labelHeight + labelGap));
+                    const labelColor = COLORS[skill.color];
+
+                    // Measure text width
+                    ctx.font = '600 12px "Open Sans", sans-serif';
+                    const textWidth = ctx.measureText(skill.name).width;
+                    const labelWidth = textWidth + labelPadding * 2 + 16;
+
+                    // Draw label background with rounded corners
+                    const labelX = zoneCenterX - labelWidth / 2;
+                    drawRoundedRect(ctx, labelX, labelY - labelHeight / 2, labelWidth, labelHeight, 6, labelColor);
+
+                    // Draw text
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(skill.name, zoneCenterX, labelY);
+
+                    // Draw pointer line
+                    ctx.beginPath();
+                    ctx.strokeStyle = labelColor;
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(zoneCenterX, labelY + labelHeight / 2);
+                    ctx.lineTo(zoneCenterX, padding.top + 10);
+                    ctx.stroke();
+
+                    // Draw small circle at end
+                    ctx.beginPath();
+                    ctx.fillStyle = labelColor;
+                    ctx.arc(zoneCenterX, padding.top + 10, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            });
+
+            // Draw title
+            ctx.font = '700 18px "Montserrat", sans-serif';
+            ctx.fillStyle = '#2D5C5E';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            // Title is handled by the card, so we skip it here
+        }
+
+        function drawRoundedRect(ctx, x, y, width, height, radius, color) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawPersonIcon(ctx, x, y, size) {
+            ctx.fillStyle = 'rgba(45, 92, 94, 0.4)';
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(x, y - size * 0.7, size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body (triangle-ish)
+            ctx.beginPath();
+            ctx.moveTo(x, y - size * 0.35);
+            ctx.lineTo(x - size * 0.35, y + size * 0.3);
+            ctx.lineTo(x + size * 0.35, y + size * 0.3);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function downloadChart() {
+            const canvas = document.getElementById('bellCurveCanvas');
+            const link = document.createElement('a');
+            link.download = 'neuropsych-bell-curve.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function clearAll() {
+            skills = [];
+            renderSkillsList();
+            document.getElementById('chartContainer').classList.remove('visible');
+            document.getElementById('errorMessage').classList.remove('visible');
+        }
+
+        // Enter key to add skill
+        document.getElementById('skillName').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill();
+            }
+        });
+
+        // Load example data on page load
+        loadExampleData();
+    </script>
+</body>
+</html>
