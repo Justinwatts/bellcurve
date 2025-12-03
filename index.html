@@ -592,10 +592,17 @@
             const chartWidth = chartEndX - chartStartX;
 
             // Calculate zone x positions - aligned with bell curve width
+            // Ensure zones sum exactly to chartWidth with no rounding errors
             let zoneXPositions = [];
             let currentX = chartStartX;
             for (let i = 0; i < ZONES.length; i++) {
-                const width = ZONE_WIDTH_RATIOS[i] * chartWidth;
+                let width;
+                if (i === ZONES.length - 1) {
+                    // Last zone takes remaining width to avoid rounding gaps
+                    width = chartEndX - currentX;
+                } else {
+                    width = ZONE_WIDTH_RATIOS[i] * chartWidth;
+                }
                 zoneXPositions.push({
                     start: currentX,
                     end: currentX + width,
@@ -833,16 +840,16 @@
             ctx.lineTo(x, y + size * 0.1);
             ctx.stroke();
 
-            // Left arm - raised up at ~45 degrees (celebrating pose)
+            // Left arm - horizontal (90 degrees to body)
             ctx.beginPath();
-            ctx.moveTo(x, y - size * 0.3);
-            ctx.lineTo(x - size * 0.35, y - size * 0.55);
+            ctx.moveTo(x, y - size * 0.2);
+            ctx.lineTo(x - size * 0.35, y - size * 0.2);
             ctx.stroke();
 
-            // Right arm - raised up at ~45 degrees (celebrating pose)
+            // Right arm - horizontal (90 degrees to body)
             ctx.beginPath();
-            ctx.moveTo(x, y - size * 0.3);
-            ctx.lineTo(x + size * 0.35, y - size * 0.55);
+            ctx.moveTo(x, y - size * 0.2);
+            ctx.lineTo(x + size * 0.35, y - size * 0.2);
             ctx.stroke();
 
             // Left leg - angled at ~30 degrees
