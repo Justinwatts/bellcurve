@@ -581,15 +581,19 @@
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Layout dimensions - NO padding for colored bands
+            // Layout dimensions
             const curveAreaHeight = 320;
             const bandsAreaHeight = 350;
             const curveBottom = curveAreaHeight;
-            const chartWidth = canvas.width;
 
-            // Calculate zone x positions - FULL WIDTH from edge to edge
+            // Define the chart area boundaries - same for curve AND bands
+            const chartStartX = 20;  // Small margin for aesthetics
+            const chartEndX = canvas.width - 20;
+            const chartWidth = chartEndX - chartStartX;
+
+            // Calculate zone x positions - aligned with bell curve width
             let zoneXPositions = [];
-            let currentX = 0;
+            let currentX = chartStartX;
             for (let i = 0; i < ZONES.length; i++) {
                 const width = ZONE_WIDTH_RATIOS[i] * chartWidth;
                 zoneXPositions.push({
@@ -601,7 +605,7 @@
                 currentX += width;
             }
 
-            // 1. Draw colored bands - FULL WIDTH from x=0 to canvas.width
+            // 1. Draw colored bands - aligned with bell curve (chartStartX to chartEndX)
             ZONES.forEach((zone, i) => {
                 ctx.fillStyle = zone.color;
                 ctx.fillRect(
@@ -628,7 +632,7 @@
 
             for (let i = 0; i <= numPoints; i++) {
                 const t = i / numPoints;
-                const x = t * chartWidth;
+                const x = chartStartX + t * chartWidth;  // Use same boundaries as bands
                 const score = 55 + t * 90;
                 const height = bellCurveY(score, curveAreaHeight);
                 const canvasY = curveBottom - height;
@@ -637,9 +641,9 @@
 
             // 3. Fill under the bell curve with semi-transparent blue
             ctx.beginPath();
-            ctx.moveTo(0, curveBottom);
+            ctx.moveTo(chartStartX, curveBottom);
             curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
-            ctx.lineTo(chartWidth, curveBottom);
+            ctx.lineTo(chartEndX, curveBottom);
             ctx.closePath();
             ctx.fillStyle = 'rgba(100, 150, 190, 0.6)';
             ctx.fill();
@@ -649,9 +653,9 @@
 
             // Create clipping path from bell curve
             ctx.beginPath();
-            ctx.moveTo(0, curveBottom);
+            ctx.moveTo(chartStartX, curveBottom);
             curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
-            ctx.lineTo(chartWidth, curveBottom);
+            ctx.lineTo(chartEndX, curveBottom);
             ctx.closePath();
             ctx.clip();
 
@@ -659,15 +663,15 @@
             const iconWidth = 14;
             const iconHeight = 24;
             const spacingX = 20;
-            const spacingY = 25;
+            const spacingY = 28;
 
             const numCols = Math.ceil(chartWidth / spacingX) + 1;
             const numRows = Math.ceil(curveAreaHeight / spacingY) + 1;
 
             for (let row = 0; row < numRows; row++) {
                 for (let col = 0; col < numCols; col++) {
-                    const x = col * spacingX + spacingX / 2;
-                    const y = curveBottom - 15 - row * spacingY;
+                    const x = chartStartX + col * spacingX + spacingX / 2;
+                    const y = curveBottom - 18 - row * spacingY;
                     drawStickFigure(ctx, x, y, iconWidth);
                 }
             }
@@ -688,7 +692,7 @@
             ctx.stroke();
 
             // 6. Draw center mean line (dashed)
-            const centerX = scoreToX(100, chartWidth);
+            const centerX = chartStartX + scoreToXLocal(100, chartWidth);
             ctx.beginPath();
             ctx.strokeStyle = '#1F2937';
             ctx.lineWidth = 2;
@@ -697,6 +701,14 @@
             ctx.lineTo(centerX, curveBottom + bandsAreaHeight);
             ctx.stroke();
             ctx.setLineDash([]);
+
+            // Helper function for local score to X conversion
+            function scoreToXLocal(score, width) {
+                const minScore = 55;
+                const maxScore = 145;
+                const t = (score - minScore) / (maxScore - minScore);
+                return t * width;
+            }
 
             // 7. Draw zone labels in the colored bands
             ctx.textAlign = 'center';
@@ -725,8 +737,8 @@
             const labelGap = 38;
 
             skills.forEach((skill, skillIndex) => {
-                const lowerX = scoreToX(skill.lowerScore, chartWidth);
-                const upperX = scoreToX(skill.upperScore, chartWidth);
+                const lowerX = chartStartX + scoreToXLocal(skill.lowerScore, chartWidth);
+                const upperX = chartStartX + scoreToXLocal(skill.upperScore, chartWidth);
                 const midX = (lowerX + upperX) / 2;
                 const labelColor = COLORS[skill.color];
 
@@ -782,8 +794,8 @@
             ctx.beginPath();
             ctx.strokeStyle = '#2D5C5E';
             ctx.lineWidth = 2;
-            ctx.moveTo(0, curveBottom);
-            ctx.lineTo(chartWidth, curveBottom);
+            ctx.moveTo(chartStartX, curveBottom);
+            ctx.lineTo(chartEndX, curveBottom);
             ctx.stroke();
         }
 
@@ -806,31 +818,43 @@
         function drawStickFigure(ctx, x, y, size) {
             ctx.strokeStyle = '#4B5563';
             ctx.fillStyle = '#4B5563';
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
             ctx.lineCap = 'round';
 
             // Head (circle) - 8px diameter
-            const headRadius = 3.5;
+            const headRadius = 4;
             ctx.beginPath();
             ctx.arc(x, y - size * 0.55, headRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Body (vertical line)
+            // Body (vertical line) - about 10px long
             ctx.beginPath();
             ctx.moveTo(x, y - size * 0.35);
             ctx.lineTo(x, y + size * 0.1);
             ctx.stroke();
 
-            // Left leg
+            // Left arm - raised up at ~45 degrees (celebrating pose)
             ctx.beginPath();
-            ctx.moveTo(x, y + size * 0.1);
-            ctx.lineTo(x - size * 0.18, y + size * 0.4);
+            ctx.moveTo(x, y - size * 0.3);
+            ctx.lineTo(x - size * 0.35, y - size * 0.55);
             ctx.stroke();
 
-            // Right leg
+            // Right arm - raised up at ~45 degrees (celebrating pose)
+            ctx.beginPath();
+            ctx.moveTo(x, y - size * 0.3);
+            ctx.lineTo(x + size * 0.35, y - size * 0.55);
+            ctx.stroke();
+
+            // Left leg - angled at ~30 degrees
             ctx.beginPath();
             ctx.moveTo(x, y + size * 0.1);
-            ctx.lineTo(x + size * 0.18, y + size * 0.4);
+            ctx.lineTo(x - size * 0.2, y + size * 0.45);
+            ctx.stroke();
+
+            // Right leg - angled at ~30 degrees
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.1);
+            ctx.lineTo(x + size * 0.2, y + size * 0.45);
             ctx.stroke();
         }
 
