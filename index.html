@@ -403,16 +403,16 @@
     <script>
         // WISC-V/WAIS-IV Classification System
         const ZONES = [
-            { name: 'Extremely Low', minScore: 0, maxScore: 69, color: '#F4A4A4', percentile: '<2', population: 2 },
-            { name: 'Very Low', minScore: 70, maxScore: 79, color: '#FCE588', percentile: '2-8', population: 7 },
-            { name: 'Low Average', minScore: 80, maxScore: 89, color: '#C6E8A8', percentile: '9-24', population: 16 },
-            { name: 'Average', minScore: 90, maxScore: 109, color: '#7DD3C0', percentile: '25-74', population: 50 },
-            { name: 'High Average', minScore: 110, maxScore: 119, color: '#C6E8A8', percentile: '75-90', population: 16 },
-            { name: 'Very High', minScore: 120, maxScore: 129, color: '#FCE588', percentile: '91-97', population: 7 },
-            { name: 'Extremely High', minScore: 130, maxScore: 200, color: '#F4A4A4', percentile: '98-99.9', population: 2 }
+            { name: 'Extremely Low', minScore: 0, maxScore: 69, color: '#F4A4A4', percentile: '<2' },
+            { name: 'Very Low', minScore: 70, maxScore: 79, color: '#FCE588', percentile: '2-8' },
+            { name: 'Low Average', minScore: 80, maxScore: 89, color: '#C6E8A8', percentile: '9-24' },
+            { name: 'Average', minScore: 90, maxScore: 109, color: '#7DD3C0', percentile: '25-74' },
+            { name: 'High Average', minScore: 110, maxScore: 119, color: '#C6E8A8', percentile: '75-90' },
+            { name: 'Very High', minScore: 120, maxScore: 129, color: '#FCE588', percentile: '91-97' },
+            { name: 'Extremely High', minScore: 130, maxScore: 200, color: '#F4A4A4', percentile: '98-99.9' }
         ];
 
-        // Zone width ratios (adjusted for visibility in extreme zones)
+        // Zone width ratios - extends full width (no padding)
         const ZONE_WIDTH_RATIOS = [0.08, 0.10, 0.14, 0.22, 0.14, 0.10, 0.08];
 
         const COLORS = {
@@ -442,7 +442,7 @@
                     return i;
                 }
             }
-            return 3; // Default to Average
+            return 3;
         }
 
         function getZoneName(score) {
@@ -455,7 +455,6 @@
             return getZoneName(midpoint);
         }
 
-        // Load default example data with confidence intervals
         function loadExampleData() {
             skills = [
                 { name: 'Verbal Skills', lowerScore: 108, upperScore: 118, color: 'orange' },
@@ -557,13 +556,21 @@
             drawBellCurve();
         }
 
-        // Convert standard score to x position on chart
-        function scoreToX(score, padding, chartWidth) {
-            // Score 55 = left edge, Score 145 = right edge, Score 100 = center
+        // Convert standard score to x position on chart (full width, no padding)
+        function scoreToX(score, chartWidth) {
             const minScore = 55;
             const maxScore = 145;
             const t = (score - minScore) / (maxScore - minScore);
-            return padding.left + t * chartWidth;
+            return t * chartWidth;
+        }
+
+        // Modified bell curve function with minimum tail height
+        function bellCurveY(score, curveAreaHeight, minHeightRatio = 0.12) {
+            const z = (score - 100) / 15;
+            const normalY = Math.exp(-0.5 * z * z);
+            // Add minimum height so tails never reach zero
+            const adjustedY = minHeightRatio + (1 - minHeightRatio) * normalY;
+            return adjustedY * (curveAreaHeight - 20);
         }
 
         function drawBellCurve() {
@@ -574,18 +581,15 @@
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Layout dimensions
-            const padding = { top: 30, right: 30, bottom: 30, left: 30 };
-            const chartWidth = canvas.width - padding.left - padding.right;
-
-            // Split: top for curve, bottom for colored bands and labels
+            // Layout dimensions - NO padding for colored bands
             const curveAreaHeight = 320;
-            const bandsAreaHeight = 320;
-            const curveBottom = padding.top + curveAreaHeight;
+            const bandsAreaHeight = 350;
+            const curveBottom = curveAreaHeight;
+            const chartWidth = canvas.width;
 
-            // Calculate zone x positions using adjusted ratios
+            // Calculate zone x positions - FULL WIDTH from edge to edge
             let zoneXPositions = [];
-            let currentX = padding.left;
+            let currentX = 0;
             for (let i = 0; i < ZONES.length; i++) {
                 const width = ZONE_WIDTH_RATIOS[i] * chartWidth;
                 zoneXPositions.push({
@@ -597,7 +601,7 @@
                 currentX += width;
             }
 
-            // 1. Draw colored bands BELOW the curve area
+            // 1. Draw colored bands - FULL WIDTH from x=0 to canvas.width
             ZONES.forEach((zone, i) => {
                 ctx.fillStyle = zone.color;
                 ctx.fillRect(
@@ -618,36 +622,59 @@
                 ctx.stroke();
             }
 
-            // 2. Generate bell curve points
+            // 2. Generate bell curve points with minimum tail height
             const curvePoints = [];
-            const numPoints = 300;
+            const numPoints = 400;
 
             for (let i = 0; i <= numPoints; i++) {
                 const t = i / numPoints;
-                const x = padding.left + t * chartWidth;
-
-                // Map x position to standard score (55-145 range for display)
+                const x = t * chartWidth;
                 const score = 55 + t * 90;
-
-                // Calculate y using normal distribution (mean=100, sd=15)
-                const z = (score - 100) / 15;
-                const y = Math.exp(-0.5 * z * z);
-
-                // Scale y to fit in curve area
-                const canvasY = curveBottom - (y * (curveAreaHeight - 40));
-                curvePoints.push({ x, y: canvasY, normalY: y, score });
+                const height = bellCurveY(score, curveAreaHeight);
+                const canvasY = curveBottom - height;
+                curvePoints.push({ x, y: canvasY, score, height });
             }
 
             // 3. Fill under the bell curve with semi-transparent blue
             ctx.beginPath();
-            ctx.moveTo(padding.left, curveBottom);
+            ctx.moveTo(0, curveBottom);
             curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
-            ctx.lineTo(padding.left + chartWidth, curveBottom);
+            ctx.lineTo(chartWidth, curveBottom);
             ctx.closePath();
             ctx.fillStyle = 'rgba(100, 150, 190, 0.6)';
             ctx.fill();
 
-            // 4. Draw curve outline
+            // 4. Draw people icons using clipping mask
+            ctx.save();
+
+            // Create clipping path from bell curve
+            ctx.beginPath();
+            ctx.moveTo(0, curveBottom);
+            curvePoints.forEach(point => ctx.lineTo(point.x, point.y));
+            ctx.lineTo(chartWidth, curveBottom);
+            ctx.closePath();
+            ctx.clip();
+
+            // Draw uniform grid of people icons
+            const iconWidth = 14;
+            const iconHeight = 24;
+            const spacingX = 20;
+            const spacingY = 25;
+
+            const numCols = Math.ceil(chartWidth / spacingX) + 1;
+            const numRows = Math.ceil(curveAreaHeight / spacingY) + 1;
+
+            for (let row = 0; row < numRows; row++) {
+                for (let col = 0; col < numCols; col++) {
+                    const x = col * spacingX + spacingX / 2;
+                    const y = curveBottom - 15 - row * spacingY;
+                    drawStickFigure(ctx, x, y, iconWidth);
+                }
+            }
+
+            ctx.restore();
+
+            // 5. Draw curve outline (after restoring context)
             ctx.beginPath();
             ctx.strokeStyle = '#2D5C5E';
             ctx.lineWidth = 3;
@@ -660,61 +687,16 @@
             });
             ctx.stroke();
 
-            // 5. Draw center mean line (dashed)
-            const centerX = scoreToX(100, padding, chartWidth);
+            // 6. Draw center mean line (dashed)
+            const centerX = scoreToX(100, chartWidth);
             ctx.beginPath();
             ctx.strokeStyle = '#1F2937';
             ctx.lineWidth = 2;
             ctx.setLineDash([8, 6]);
-            ctx.moveTo(centerX, padding.top);
+            ctx.moveTo(centerX, 0);
             ctx.lineTo(centerX, curveBottom + bandsAreaHeight);
             ctx.stroke();
             ctx.setLineDash([]);
-
-            // 6. Draw 100 people icons with proper distribution
-            const iconWidth = 16;
-            const iconHeight = 28;
-
-            ZONES.forEach((zone, zoneIndex) => {
-                const count = zone.population;
-                const zoneStart = zoneXPositions[zoneIndex].start;
-                const zoneWidth = zoneXPositions[zoneIndex].width;
-                const zoneCenterX = zoneXPositions[zoneIndex].center;
-
-                // Calculate grid layout based on zone width and count
-                const maxCols = Math.floor((zoneWidth - 10) / (iconWidth + 4));
-                const cols = Math.min(maxCols, count);
-                const rows = Math.ceil(count / cols);
-
-                const spacingX = Math.min((zoneWidth - 20) / cols, iconWidth + 6);
-                const spacingY = iconHeight + 4;
-
-                const baseY = curveBottom - 25;
-
-                let iconIndex = 0;
-                for (let row = 0; row < rows && iconIndex < count; row++) {
-                    const iconsInRow = Math.min(cols, count - iconIndex);
-                    const rowWidth = iconsInRow * spacingX;
-                    const rowStartX = zoneCenterX - rowWidth / 2 + spacingX / 2;
-
-                    for (let col = 0; col < iconsInRow && iconIndex < count; col++) {
-                        const iconX = rowStartX + col * spacingX;
-                        const iconY = baseY - row * spacingY;
-
-                        // Check if within curve boundary
-                        const iconScore = 55 + ((iconX - padding.left) / chartWidth) * 90;
-                        const iconZ = (iconScore - 100) / 15;
-                        const curveHeightAtIcon = Math.exp(-0.5 * iconZ * iconZ) * (curveAreaHeight - 40);
-                        const curveYAtIcon = curveBottom - curveHeightAtIcon;
-
-                        if (iconY > curveYAtIcon + 15) {
-                            drawStickFigure(ctx, iconX, iconY, iconWidth);
-                        }
-
-                        iconIndex++;
-                    }
-                }
-            });
 
             // 7. Draw zone labels in the colored bands
             ctx.textAlign = 'center';
@@ -743,8 +725,8 @@
             const labelGap = 38;
 
             skills.forEach((skill, skillIndex) => {
-                const lowerX = scoreToX(skill.lowerScore, padding, chartWidth);
-                const upperX = scoreToX(skill.upperScore, padding, chartWidth);
+                const lowerX = scoreToX(skill.lowerScore, chartWidth);
+                const upperX = scoreToX(skill.upperScore, chartWidth);
                 const midX = (lowerX + upperX) / 2;
                 const labelColor = COLORS[skill.color];
 
@@ -800,8 +782,8 @@
             ctx.beginPath();
             ctx.strokeStyle = '#2D5C5E';
             ctx.lineWidth = 2;
-            ctx.moveTo(padding.left, curveBottom);
-            ctx.lineTo(padding.left + chartWidth, curveBottom);
+            ctx.moveTo(0, curveBottom);
+            ctx.lineTo(chartWidth, curveBottom);
             ctx.stroke();
         }
 
@@ -824,13 +806,13 @@
         function drawStickFigure(ctx, x, y, size) {
             ctx.strokeStyle = '#4B5563';
             ctx.fillStyle = '#4B5563';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1.5;
             ctx.lineCap = 'round';
 
             // Head (circle) - 8px diameter
-            const headRadius = 4;
+            const headRadius = 3.5;
             ctx.beginPath();
-            ctx.arc(x, y - size * 0.6, headRadius, 0, Math.PI * 2);
+            ctx.arc(x, y - size * 0.55, headRadius, 0, Math.PI * 2);
             ctx.fill();
 
             // Body (vertical line)
@@ -842,13 +824,13 @@
             // Left leg
             ctx.beginPath();
             ctx.moveTo(x, y + size * 0.1);
-            ctx.lineTo(x - size * 0.2, y + size * 0.45);
+            ctx.lineTo(x - size * 0.18, y + size * 0.4);
             ctx.stroke();
 
             // Right leg
             ctx.beginPath();
             ctx.moveTo(x, y + size * 0.1);
-            ctx.lineTo(x + size * 0.2, y + size * 0.45);
+            ctx.lineTo(x + size * 0.18, y + size * 0.4);
             ctx.stroke();
         }
 
@@ -863,7 +845,6 @@
         function clearAll() {
             skills = [];
             renderSkillsList();
-            // Clear the canvas
             const canvas = document.getElementById('bellCurveCanvas');
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#FFFFFF';
