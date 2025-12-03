@@ -401,19 +401,22 @@
     </div>
 
     <script>
-        // WISC-V/WAIS-IV Classification System
+        // WISC-V/WAIS-IV Classification System with exact score boundaries
+        // Using score range 55-145 for display (90 points total, centered on 100)
         const ZONES = [
-            { name: 'Extremely Low', minScore: 0, maxScore: 69, color: '#F4A4A4', percentile: '<2' },
-            { name: 'Very Low', minScore: 70, maxScore: 79, color: '#FCE588', percentile: '2-8' },
-            { name: 'Low Average', minScore: 80, maxScore: 89, color: '#C6E8A8', percentile: '9-24' },
-            { name: 'Average', minScore: 90, maxScore: 109, color: '#7DD3C0', percentile: '25-74' },
-            { name: 'High Average', minScore: 110, maxScore: 119, color: '#C6E8A8', percentile: '75-90' },
-            { name: 'Very High', minScore: 120, maxScore: 129, color: '#FCE588', percentile: '91-97' },
-            { name: 'Extremely High', minScore: 130, maxScore: 200, color: '#F4A4A4', percentile: '98-99.9' }
+            { name: 'Extremely Low', startScore: 55, endScore: 70, color: '#F4A4A4', percentile: '<2' },
+            { name: 'Very Low', startScore: 70, endScore: 80, color: '#FCE588', percentile: '2-8' },
+            { name: 'Low Average', startScore: 80, endScore: 90, color: '#C6E8A8', percentile: '9-24' },
+            { name: 'Average', startScore: 90, endScore: 110, color: '#7DD3C0', percentile: '25-74' },
+            { name: 'High Average', startScore: 110, endScore: 120, color: '#C6E8A8', percentile: '75-90' },
+            { name: 'Very High', startScore: 120, endScore: 130, color: '#FCE588', percentile: '91-97' },
+            { name: 'Extremely High', startScore: 130, endScore: 145, color: '#F4A4A4', percentile: '98-99.9' }
         ];
 
-        // Zone width ratios - extends full width (no padding)
-        const ZONE_WIDTH_RATIOS = [0.08, 0.10, 0.14, 0.22, 0.14, 0.10, 0.08];
+        // Score range for the chart
+        const MIN_SCORE = 55;
+        const MAX_SCORE = 145;
+        const SCORE_RANGE = MAX_SCORE - MIN_SCORE; // 90 points
 
         const COLORS = {
             gray: '#6B7280',
@@ -438,9 +441,13 @@
 
         function getZoneForScore(score) {
             for (let i = 0; i < ZONES.length; i++) {
-                if (score >= ZONES[i].minScore && score <= ZONES[i].maxScore) {
+                if (score >= ZONES[i].startScore && score < ZONES[i].endScore) {
                     return i;
                 }
+            }
+            // Handle edge case for max score
+            if (score >= ZONES[ZONES.length - 1].startScore) {
+                return ZONES.length - 1;
             }
             return 3;
         }
@@ -591,25 +598,24 @@
             const chartEndX = canvas.width - 20;
             const chartWidth = chartEndX - chartStartX;
 
-            // Calculate zone x positions - aligned with bell curve width
-            // Ensure zones sum exactly to chartWidth with no rounding errors
+            // Calculate zone x positions using exact score-to-pixel mapping
+            // This ensures zones are mathematically precise and centered correctly
+            function scoreToXLocal(score) {
+                const t = (score - MIN_SCORE) / SCORE_RANGE;
+                return chartStartX + t * chartWidth;
+            }
+
             let zoneXPositions = [];
-            let currentX = chartStartX;
             for (let i = 0; i < ZONES.length; i++) {
-                let width;
-                if (i === ZONES.length - 1) {
-                    // Last zone takes remaining width to avoid rounding gaps
-                    width = chartEndX - currentX;
-                } else {
-                    width = ZONE_WIDTH_RATIOS[i] * chartWidth;
-                }
+                const zone = ZONES[i];
+                const startX = scoreToXLocal(zone.startScore);
+                const endX = scoreToXLocal(zone.endScore);
                 zoneXPositions.push({
-                    start: currentX,
-                    end: currentX + width,
-                    center: currentX + width / 2,
-                    width: width
+                    start: startX,
+                    end: endX,
+                    center: (startX + endX) / 2,
+                    width: endX - startX
                 });
-                currentX += width;
             }
 
             // 1. Draw colored bands - aligned with bell curve (chartStartX to chartEndX)
@@ -698,8 +704,8 @@
             });
             ctx.stroke();
 
-            // 6. Draw center mean line (dashed)
-            const centerX = chartStartX + scoreToXLocal(100, chartWidth);
+            // 6. Draw center mean line (dashed) - at score 100
+            const centerX = scoreToXLocal(100);
             ctx.beginPath();
             ctx.strokeStyle = '#1F2937';
             ctx.lineWidth = 2;
@@ -708,14 +714,6 @@
             ctx.lineTo(centerX, curveBottom + bandsAreaHeight);
             ctx.stroke();
             ctx.setLineDash([]);
-
-            // Helper function for local score to X conversion
-            function scoreToXLocal(score, width) {
-                const minScore = 55;
-                const maxScore = 145;
-                const t = (score - minScore) / (maxScore - minScore);
-                return t * width;
-            }
 
             // 7. Draw zone labels in the colored bands
             ctx.textAlign = 'center';
@@ -744,8 +742,8 @@
             const labelGap = 38;
 
             skills.forEach((skill, skillIndex) => {
-                const lowerX = chartStartX + scoreToXLocal(skill.lowerScore, chartWidth);
-                const upperX = chartStartX + scoreToXLocal(skill.upperScore, chartWidth);
+                const lowerX = scoreToXLocal(skill.lowerScore);
+                const upperX = scoreToXLocal(skill.upperScore);
                 const midX = (lowerX + upperX) / 2;
                 const labelColor = COLORS[skill.color];
 
